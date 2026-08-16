@@ -5,6 +5,7 @@ import (
 	"monkey/ast"
 	"monkey/lexer"
 	"testing"
+
 )
 
 func TestLetStatements(t *testing.T) {
@@ -408,4 +409,50 @@ func testInfixExpression(t *testing.T, exp ast.Expression, left interface{}, ope
 	}
 
 	return true
+}
+
+func TestBooleanExpression(t *testing.T) {
+	tests := []struct {
+		input string
+		expectedBoolean bool
+	} {
+		{"true",true},
+		{"false",false},
+	}
+
+	for _,tt := range tests {
+		
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+	
+		if len(program.Statements) != 1 {
+			t.Fatalf("program does not have enough statements, got=%d", len(program.Statements))
+		}	
+	
+		if len(program.Statements) != 1 {
+			t.Fatalf("program does not have enough statements, got=%d", len(program.Statements))
+		}
+	
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+	
+		literal, ok := stmt.Expression.(*ast.Boolean)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.Boolean. got=%T", stmt.Expression)
+		}
+		
+		if literal.Value != tt.expectedBoolean {
+			t.Errorf("literal.Value not %t. got=%t", tt.expectedBoolean, literal.Value)
+		}
+
+		expected := fmt.Sprintf("%t", tt.expectedBoolean)
+	
+		if literal.TokenLiteral() != expected {
+			t.Errorf("ident.TokenLiteral() not %s. got=%s", expected, literal.TokenLiteral())
+		}
+	}
 }
