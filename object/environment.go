@@ -18,8 +18,8 @@ func (e *Environment) Get(name string) (Object, bool) {
 	return obj, ok
 }
 
-func(e *Environment) Set(name string, val Object) Object {
-	e.store[name] = val 
+func (e *Environment) Set(name string, val Object) Object {
+	e.store[name] = val
 	return val
 }
 
@@ -28,4 +28,3 @@ func NewEnclosedEnvironment(outer *Environment) *Environment {
 	env.outer = outer
 	return env
 }
-

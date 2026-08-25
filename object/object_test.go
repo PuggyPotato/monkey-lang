@@ -16,4 +16,3 @@ func TestStringHashKey(t *testing.T) {
 		t.Errorf("strings with same content have different hash keys")
 	}
 }
-
