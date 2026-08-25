@@ -47,11 +47,11 @@ func testEval(input string) object.Object {
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 	result, ok := obj.(*object.Integer)
 	if !ok {
-		t.Fatalf("object is not Integer. got=%T (+%v)", obj, obj)
+		t.Errorf("object is not Integer. got=%T (+%v)", obj, obj)
 		return false
 	}
 	if result.Value != expected {
-		t.Fatalf("object has wrong value. got=%d, want=%d", result.Value, expected)
+		t.Errorf("object has wrong value. got=%d, want=%d", result.Value, expected)
 		return false
 	}
 
@@ -216,7 +216,7 @@ func TestErrorHandling(t *testing.T) {
 		},
 		{
 			"foobar",
-			"identifier not found:foobar",
+			"identifier not found: foobar",
 		},
 		{
 			`"Hello" - "World"`,
@@ -333,5 +333,37 @@ func TestStringConcatenation(t *testing.T) {
 
 	if str.Value != "Hello World!" {
 		t.Errorf("String hast the wrong value. got=%q", str.Value)
+	}
+}
+
+func TestBuiltInFunctions(t *testing.T) {
+	tests := []struct {
+		input string
+		expected any
+	} {
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{`len("hello world")`,  11},
+		{`len(1)`, "argument to `len` not supported, got INTEGER"},
+		{`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch expected := tt.expected.(type) {
+			case int:
+				testIntegerObject(t, evaluated, int64(expected))
+			case string:
+				errObj, ok := evaluated.(*object.Error)
+				if !ok {
+					t.Errorf("object is not Error. got=%T (%+v)", evaluated, evaluated)
+					continue
+				}
+
+				if errObj.Message != expected {
+					t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
+				}
+		}
 	}
 }
